@@ -12,13 +12,11 @@ using namespace std;
 int main(){
     Client client;
     Server server;
+    /*读数据集*/
 
-
-    /*PuncPRF Setup  */
+    // PuncPRF Setup
     uint8_t *key = (unsigned char*) "0123456789123456";
     PuncPRF::SetUp(key, 16);
-
-    /*读数据集*/
 
     // 打开文件
     ifstream file("../dataset/Enron_linkedList/0.txt");
@@ -56,7 +54,19 @@ int main(){
         client.Update(id, keywords, true, A1, A2);
         server.Update(A1, A2);
     }
-
     file.close();  // 关闭文件
+
+    /*Search*/
+    std::vector<std::string> keywords = {"brief", "join"};
+    St_1 st_1;
+    int st_2;
+    std::string x = client.GenerateSt(keywords, st_1, st_2);
+
+    std::set<R_Element> R_;
+    std::string proof;
+    std::string proof_;
+    server.Search(st_1, st_2, R_, proof, proof_);
+    client.Search(keywords, x, R_);
+    
     return 0;
 }

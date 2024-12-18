@@ -8,11 +8,11 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
     std::string ranId = Crypto_Primitives::get_rand(16);
     std::vector<int> SID; 
     for(int i=0;i<w.size();i++){
-        std::string vW = "";
+        int vW;
         int lcntW;
         int valcntW;
         if(this->Dict.find(w[i]) == this->Dict.end()){
-            vW = "1";
+            vW = 1;
             lcntW = 0;
             valcntW = 0;
         }else{
@@ -21,7 +21,7 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
             valcntW = Dict[w[i]].valcntW;
         }
         unsigned char kW_v[PRF_LEN];
-        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(w[i]+vW).c_str(), (w[i]+vW).length(), kW_v);
+        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(w[i] + std::to_string(vW)).c_str(), (w[i] + std::to_string(vW)).length(), kW_v);
         std::string skW_v((char*)kW_v, PRF_LEN);
 
         lcntW++;
@@ -53,7 +53,7 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
         
         A1.insert(A1Element(tag, sdata, svt));
 
-        Dict[w[i]] = DictElement(skW_v, lcntW, valcntW);
+        Dict[w[i]] = DictElement(vW, lcntW, valcntW);
 
         if(op){
             if(F_2.find(w[i]) == F_2.end()){
@@ -70,4 +70,61 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
         std::string svt((char*)vt, PRF_LEN);
         A2 = A2Element(id, K_SID, svt);
     }
+}
+
+std::string Client::GenerateSt(std::vector<std::string>& keywords, St_1& st_1, int& st_2){
+    int leastValcnt = INT_MAX; // 更新最少的keyword
+    std::string x; // 更新最少的keyword
+    int index; // 更新最少的keyword的下标
+    for(int i=0;i<keywords.size();i++){
+        std::string w = keywords[i];
+        if(Dict.find(w) == Dict.end()){
+            return "";
+        }
+        DictElement e = Dict[w]; 
+        if(e.valcntW < leastValcnt) {
+            leastValcnt = e.valcntW;
+            x = w;
+            index = i;
+        }
+    }
+
+    keywords.erase(keywords.begin() + index);
+
+    std::string skX_v_1="";
+    if(Dict[x].vW > 1){
+        unsigned char kX_v_1[PRF_LEN];
+        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(x + std::to_string(Dict[x].vW-1)).c_str(), PRF_LEN, kX_v_1);
+        skX_v_1 = std::string((char*)kX_v_1, PRF_LEN);
+    }
+
+    std::string skX_v;
+    unsigned char kX_v[PRF_LEN];
+    Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(x + std::to_string(Dict[x].vW)).c_str(), PRF_LEN, kX_v);
+    skX_v_1 = std::string((char*)kX_v, PRF_LEN);
+
+    st_1.kX_v_1 = skX_v_1;
+    st_1.kX_v = skX_v;
+    st_1.lcntW = Dict[x].lcntW;
+    st_2 = 1;
+
+    return x;
+}
+
+std::set<std::string> Client::Search(std::vector<std::string> keywords, std::string x, std::set<R_Element> R_){
+    std::set<std::string> R;
+    Dict[x].vW = Dict[x].vW + 1;
+    for(auto e : R_){
+        int flag = 1;
+        PuncPRF::PPRF_compute_all_keys(e.data);
+        for(int i=0;i<keywords.size();i++){
+            if(PuncPRF::PPRF_Eval(F_2[e.id])){
+               flag = 0;
+            }
+        }
+        if(flag){
+            R.insert(e.id);
+        }
+    }
+    return R;
 }

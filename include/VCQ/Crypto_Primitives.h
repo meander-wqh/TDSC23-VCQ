@@ -128,7 +128,7 @@ public:
 
     static void padding(std::string input, int pad2Len, unsigned char* output);
 
-
+    static std::string DePatch(unsigned char* input, int pad2Len);
 
 };
 

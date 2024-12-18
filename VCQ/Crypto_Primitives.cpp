@@ -264,3 +264,14 @@ void Crypto_Primitives::padding(std::string input, int pad2Len, unsigned char* o
     memcpy(output,(unsigned char*)input.c_str(),pad2Len);
 }
 
+std::string Crypto_Primitives::DePatch(unsigned char* input, int pad2Len){
+    std::string output;
+    for(int i=0;i<pad2Len;i++){
+        if(input[i] == '#'){
+            break;
+        }
+        output += input[i];
+    }
+    return output;
+}
+
