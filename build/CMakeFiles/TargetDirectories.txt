@@ -1,0 +1,3 @@
+/home/node10/yangxu/TDSC23-VCQ/build/CMakeFiles/STATIC.dir
+/home/node10/yangxu/TDSC23-VCQ/build/CMakeFiles/edit_cache.dir
+/home/node10/yangxu/TDSC23-VCQ/build/CMakeFiles/rebuild_cache.dir

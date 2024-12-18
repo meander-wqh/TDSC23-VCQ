@@ -1,0 +1,2 @@
+/home/node10/anaconda3/bin/x86_64-conda-linux-gnu-ar qc ../../lib/libPuncturable_PRF.a CMakeFiles/Puncturable_PRF.dir/Punc_PRF.cpp.o CMakeFiles/Puncturable_PRF.dir/main.cpp.o CMakeFiles/Puncturable_PRF.dir/test.cpp.o CMakeFiles/Puncturable_PRF.dir/GGM/GGMTree.cpp.o CMakeFiles/Puncturable_PRF.dir/GGM/Utils.c.o
+/home/node10/anaconda3/bin/x86_64-conda-linux-gnu-ranlib ../../lib/libPuncturable_PRF.a
