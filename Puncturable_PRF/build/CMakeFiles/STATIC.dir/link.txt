@@ -1,0 +1,2 @@
+/home/node10/anaconda3/bin/x86_64-conda-linux-gnu-ar qc libSTATIC.a CMakeFiles/STATIC.dir/Punc_PRF.cpp.o CMakeFiles/STATIC.dir/main.cpp.o CMakeFiles/STATIC.dir/test.cpp.o CMakeFiles/STATIC.dir/GGM/GGMTree.cpp.o CMakeFiles/STATIC.dir/GGM/Utils.c.o
+/home/node10/anaconda3/bin/x86_64-conda-linux-gnu-ranlib libSTATIC.a

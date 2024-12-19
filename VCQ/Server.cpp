@@ -22,17 +22,17 @@ void Server::Search(St_1 st_1, int st_2, std::set<R_Element>& R_, std::string& p
         std::string temp = Crypto_Primitives::sha256((st_1.kX_v + std::to_string(lcntX)).c_str());
         Crypto_Primitives::string_xor((char*)temp.c_str(), (char*)e.data.c_str(), SHA256_SIZE, res);
         std::string sres = Crypto_Primitives::DePatch((unsigned char*)res, SHA256_SIZE); //id||op
+        // cout<<"id||op: "<<sres<<endl;
 
         char temp_proof[PRF_LEN];
         Crypto_Primitives::string_xor((char*)proof.c_str(), (char*)e.vt.c_str(), SHA256_SIZE, temp_proof);
         proof = std::string(temp_proof, PRF_LEN);
 
         if(sres[sres.size()-1] == '1'){
-            R_add.insert(sres.substr(sres.size()-1)); 
-            cout<<"id: "<<sres.substr(sres.size()-1)<<endl;
+            R_add.insert(sres.substr(0, sres.size()-1)); 
+            // cout<<"id: "<<sres.substr(0, sres.size()-1)<<endl;
         }else{
-            R_del.insert(sres.substr(sres.size()-1)); 
-            cout<<"id: "<<sres.substr(sres.size()-1)<<endl;
+            R_del.insert(sres.substr(0, sres.size()-1)); 
         }
 
         lcntX--;
@@ -67,7 +67,6 @@ void Server::Search(St_1 st_1, int st_2, std::set<R_Element>& R_, std::string& p
         Crypto_Primitives::string_xor((char*)proof_.c_str(), (char*)vt.c_str(), SHA256_SIZE, temp_proof);
         proof_ = std::string(temp_proof, PRF_LEN);
     }
-
 
 }
 

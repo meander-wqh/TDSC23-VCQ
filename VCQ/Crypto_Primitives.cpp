@@ -6,6 +6,7 @@
 #include <openssl/sha.h>
 #include <iostream>
 #include <cstring>
+#include <iomanip> 
 
 int Crypto_Primitives::sym_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
                                    unsigned char *iv, unsigned char *ciphertext)
@@ -275,3 +276,12 @@ std::string Crypto_Primitives::DePatch(unsigned char* input, int pad2Len){
     return output;
 }
 
+void Crypto_Primitives::print_string(std::string str){
+    // 遍历字符串的每个字符
+    for (char c : str) {
+        // 输出每个字符的十六进制值
+        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                  << (int)(unsigned char)c << " ";  // 需要转换为 unsigned char 类型来处理负值
+    }
+    std::cout<<std::endl;
+}

@@ -23,6 +23,7 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
         unsigned char kW_v[PRF_LEN];
         Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(w[i] + std::to_string(vW)).c_str(), (w[i] + std::to_string(vW)).length(), kW_v);
         std::string skW_v((char*)kW_v, PRF_LEN);
+        // cout<<skW_v<<endl;
 
         lcntW++;
         if(op){
@@ -30,8 +31,10 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
         }else{
             valcntW--;
         }
-
+        
         std::string tag = Crypto_Primitives::sha256((skW_v+std::to_string(lcntW)).c_str());
+        // cout<<"tag: ";
+        // Crypto_Primitives::print_string(tag);
 
         std::string temp = Crypto_Primitives::sha256((skW_v+std::to_string(lcntW)).c_str());
         char* a = (char*)temp.c_str();
@@ -51,7 +54,9 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
         Crypto_Primitives::string_xor((char*)vt_1, (char*)vt_2, PRF_LEN, (char*)vt);
         std::string svt((char*)vt, PRF_LEN);
         
-        A1.insert(A1Element(tag, sdata, svt));
+        A1Element e(tag, sdata, svt);
+        A1.insert(e);
+        // cout<<A1.size()<<endl;
 
         Dict[w[i]] = DictElement(vW, lcntW, valcntW);
 
@@ -92,6 +97,7 @@ std::string Client::GenerateSt(std::vector<std::string>& keywords, St_1& st_1, i
     keywords.erase(keywords.begin() + index);
 
     std::string skX_v_1="";
+    // cout << "vW: "<<Dict[x].vW <<endl;
     if(Dict[x].vW > 1){
         unsigned char kX_v_1[PRF_LEN];
         Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(x + std::to_string(Dict[x].vW-1)).c_str(), PRF_LEN, kX_v_1);
@@ -101,10 +107,14 @@ std::string Client::GenerateSt(std::vector<std::string>& keywords, St_1& st_1, i
     std::string skX_v;
     unsigned char kX_v[PRF_LEN];
     Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(x + std::to_string(Dict[x].vW)).c_str(), PRF_LEN, kX_v);
-    skX_v_1 = std::string((char*)kX_v, PRF_LEN);
+    skX_v = std::string((char*)kX_v, PRF_LEN);
 
     st_1.kX_v_1 = skX_v_1;
+    // cout<<"skX_v_1:";
+    // Crypto_Primitives::print_string(skX_v_1);
+    // cout<<"skX_v:";
     st_1.kX_v = skX_v;
+    // Crypto_Primitives::print_string(skX_v);
     st_1.lcntW = Dict[x].lcntW;
     st_2 = 1;
 
@@ -114,11 +124,15 @@ std::string Client::GenerateSt(std::vector<std::string>& keywords, St_1& st_1, i
 std::set<std::string> Client::Search(std::vector<std::string> keywords, std::string x, std::set<R_Element> R_){
     std::set<std::string> R;
     Dict[x].vW = Dict[x].vW + 1;
+    cout<<"R_.size(): "<< R_.size() <<endl;
+
+
     for(auto e : R_){
+        // cout<<"e.id: "<< e.id <<endl;
         int flag = 1;
         PuncPRF::PPRF_compute_all_keys(e.data);
         for(int i=0;i<keywords.size();i++){
-            if(PuncPRF::PPRF_Eval(F_2[e.id])){
+            if(PuncPRF::PPRF_Eval(F_2[keywords[i]])){
                flag = 0;
             }
         }
@@ -126,5 +140,11 @@ std::set<std::string> Client::Search(std::vector<std::string> keywords, std::str
             R.insert(e.id);
         }
     }
+
+    cout<<"Res: ";
+    for(auto r : R){
+        cout<< r <<" ";
+    }
+    cout<<endl;
     return R;
 }

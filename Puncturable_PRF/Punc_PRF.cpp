@@ -47,6 +47,9 @@ void PuncPRF::SetUp(uint8_t* key, int key_len){
 // }
 
 vector<GGMNode> PuncPRF::Punc(vector<int> delete_pos){
+    // for(int i=0;i< delete_pos.size();i++){
+    //     cout << delete_pos[i] << " ";
+    // }
     vector<GGMNode> remain_node;
     //使得node_list离开作用域就释放内存
     {
@@ -58,15 +61,19 @@ vector<GGMNode> PuncPRF::Punc(vector<int> delete_pos){
             {
                 vector<int> pos(GGM_SIZE);
                 std::iota(pos.begin(), pos.end(), 0);
-                // for (int i = 0; i < GGM_SIZE; ++i) {
-                //     pos.emplace_back(i);
-                //     std::cout<<i<<std::endl;
+                // for(int i=0;i<delete_pos.size();i++){
+                //     cout<<delete_pos[i]<<" ";
                 // }
+                // cout<<endl;
+
+                //delete_pos一定要是有序的！
+                std::sort(delete_pos.begin(), delete_pos.end());
                 set_difference(pos.begin(), pos.end(),
                             delete_pos.begin(), delete_pos.end(),
                             inserter(remain_pos, remain_pos.begin()));
             }
             node_list.reserve(remain_pos.size()); //preallocate memory for vector
+            // cout<<"remain_pos.size(): "<<remain_pos.size()<<endl;
             for (int pos : remain_pos) {
                 node_list.emplace_back(GGMNode(pos, tree->get_level()));
             }
@@ -77,11 +84,18 @@ vector<GGMNode> PuncPRF::Punc(vector<int> delete_pos){
     for(auto & i : remain_node) {
         memcpy(i.key, PuncPRF::key, AES_BLOCK_SIZE);
         GGMTree::derive_key_from_tree(i.key, i.index, i.level, 0);
+        // for (int j = 0 ; j <16; ++j){
+        //         printf ( "%02x ",i.key[j]);
+        // }
+        // cout << endl;
     }
     return remain_node;
 }
 
 void PuncPRF::PPRF_compute_all_keys(const vector<GGMNode>& remain_node) {
+    for (auto& pair : PuncPRF::keys) {
+        free(pair.second);
+    }
     PuncPRF::keys.clear();
     int level = tree->get_level();
     for(GGMNode node : remain_node) {
@@ -108,6 +122,7 @@ void PuncPRF::PPRF_compute_all_keys(const vector<GGMNode>& remain_node) {
 bool PuncPRF::PPRF_Eval(int msg){
     if(PuncPRF::keys.find(msg) == PuncPRF::keys.end()){
         cout << "stop at punctured point !" << endl;
+        return false;
     }
     else{
         cout <<"Original pseudo random value of "<< msg << " is : " << endl;
@@ -116,4 +131,5 @@ bool PuncPRF::PPRF_Eval(int msg){
         }
         cout << endl ;
     }
+    return true;
 }

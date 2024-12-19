@@ -6,8 +6,15 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <chrono>
 
 using namespace std;
+
+uint64_t timeSinceEpochMillisec() {//截取以纪元时间为单位获取当前时间戳，以微秒为单位
+
+  using namespace std::chrono;
+  return duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
+}
 
 int main(){
     Client client;
@@ -28,7 +35,11 @@ int main(){
     }
 
     string line;
+    int c = 0;
     while (getline(file, line)) {
+        if(c == 50){
+            break;
+        }
         stringstream ss(line);  // 使用stringstream来分割行内容
         string id, counter;
         
@@ -53,13 +64,15 @@ int main(){
         A2Element A2;
         client.Update(id, keywords, true, A1, A2);
         server.Update(A1, A2);
+        c++;
     }
     file.close();  // 关闭文件
 
     /*Search*/
-    std::vector<std::string> keywords = {"brief", "join"};
+    std::vector<std::string> keywords = {"allow", "space"};
     St_1 st_1;
     int st_2;
+    uint64_t start_time =  timeSinceEpochMillisec();
     std::string x = client.GenerateSt(keywords, st_1, st_2);
 
     std::set<R_Element> R_;
@@ -67,6 +80,10 @@ int main(){
     std::string proof_;
     server.Search(st_1, st_2, R_, proof, proof_);
     client.Search(keywords, x, R_);
+
+    cout<<"search finish"<<endl;
+    uint64_t end_time =  timeSinceEpochMillisec();
+    std::cout << "Final Search time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
     
     return 0;
 }

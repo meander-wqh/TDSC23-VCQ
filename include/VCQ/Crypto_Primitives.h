@@ -130,6 +130,8 @@ public:
 
     static std::string DePatch(unsigned char* input, int pad2Len);
 
+    static void print_string(std::string str);
+
 };
 
 
