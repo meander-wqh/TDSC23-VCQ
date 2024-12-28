@@ -6,6 +6,7 @@
 #include <openssl/sha.h>
 #include <iostream>
 #include <cstring>
+#include <sstream>
 #include <iomanip> 
 
 int Crypto_Primitives::sym_encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
@@ -285,3 +286,45 @@ void Crypto_Primitives::print_string(std::string str){
     }
     std::cout<<std::endl;
 }
+
+std::string Crypto_Primitives::nodeToString(const GGMNode& node){
+    std::ostringstream oss;
+    
+    // 将 index 和 level 合并成字符串
+    oss << node.index << "," << node.level << ",";
+
+    // 将 key 转换为十六进制字符串并追加到结果中
+    for (int i = 0; i < AES_BLOCK_SIZE; ++i) {
+        oss << std::setw(2) << std::setfill('0') << std::hex << (int)node.key[i];
+    }
+
+    return oss.str();
+}
+
+std::string Crypto_Primitives::K_SIDToString(const std::vector<GGMNode>& K_SID) {
+    std::ostringstream oss;
+    
+    // 遍历整个 vector
+    for (size_t i = 0; i < K_SID.size(); ++i) {
+        // 转换每个节点为字符串，并添加到输出流中
+        oss << Crypto_Primitives::nodeToString(K_SID[i]);
+        if (i < K_SID.size() - 1) {
+            oss << "\n";  // 每个 GGMNode 之间换行
+        }
+    }
+    
+    return oss.str();
+}
+
+std::string Crypto_Primitives::K_SIDToString(const std::vector<int>& K_SID){
+    std::ostringstream oss;  // 创建一个输出字符串流
+    for (size_t i = 0; i < K_SID.size(); ++i) {
+        oss << K_SID[i];  // 将每个元素写入流中
+        if (i != K_SID.size() - 1) {
+            oss << ",";  // 如果不是最后一个元素，添加逗号分隔符
+        }
+    }
+    return oss.str();  // 返回构造的字符串
+}
+
+

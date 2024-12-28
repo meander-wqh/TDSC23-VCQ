@@ -2,6 +2,8 @@
 #define CRYPTO_PRIMITIVES_H
 #include <string>
 #include <cstring>
+#include "../include/Puncturable_PRF/Punc_PRF.h"
+
 
 #define AESGCM_MAC_SIZE 16//Question: AES加密算法需要的参数？补全长度？
 
@@ -132,6 +134,11 @@ public:
 
     static void print_string(std::string str);
 
+    static std::string nodeToString(const GGMNode& node);
+
+    static std::string K_SIDToString(const std::vector<GGMNode>& K_SID);
+
+    static std::string K_SIDToString(const std::vector<int>& K_SID);
 };
 
 

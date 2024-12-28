@@ -16,10 +16,16 @@ uint64_t timeSinceEpochMillisec() {//截取以纪元时间为单位获取当前�
   return duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-int main(){
+int main(int argc, char *argv[]){
     Client client;
     Server server;
+
+    int Number = 40000;
+    int Counter = 0;
+    std::set<std::string> wSet;
+
     /*读数据集*/
+    uint64_t start_time =  timeSinceEpochMillisec();
 
     // PuncPRF Setup
     uint8_t *key = (unsigned char*) "0123456789123456";
@@ -37,9 +43,9 @@ int main(){
     string line;
     int c = 0;
     while (getline(file, line)) {
-        if(c == 50){
-            break;
-        }
+        // if(c == 100){
+        //     break;
+        // }
         stringstream ss(line);  // 使用stringstream来分割行内容
         string id, counter;
         
@@ -60,19 +66,34 @@ int main(){
             keywords.push_back(temp);
         }
 
+        wSet.insert(keywords.begin(), keywords.end());
+
         std::set<A1Element> A1;
         A2Element A2;
         client.Update(id, keywords, true, A1, A2);
         server.Update(A1, A2);
-        c++;
+
+        Counter += std::stoi(counter);
+        if(Counter >= Number){
+            break;
+        }
+        // c++;
     }
     file.close();  // 关闭文件
 
+    uint64_t end_time =  timeSinceEpochMillisec();
+    cout<<"Keywords number: "<<wSet.size()<<endl;
+    std::cout << "Update time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+
+
+
     /*Search*/
-    std::vector<std::string> keywords = {"allow", "space"};
+    std::vector<std::string> candidate_keywords = {"pdt", "0700", "phillip", "k", "2000", "enron", "ascii", "us", "7bit", "mime"};
+    std::vector<std::string> keywords = {"pdt", "0700"};
+    {
     St_1 st_1;
     int st_2;
-    uint64_t start_time =  timeSinceEpochMillisec();
+    start_time =  timeSinceEpochMillisec();
     std::string x = client.GenerateSt(keywords, st_1, st_2);
 
     std::set<R_Element> R_;
@@ -82,8 +103,117 @@ int main(){
     client.Search(keywords, x, R_);
 
     cout<<"search finish"<<endl;
-    uint64_t end_time =  timeSinceEpochMillisec();
-    std::cout << "Final Search time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
-    
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Search time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+
+    /*Verify*/
+    start_time =  timeSinceEpochMillisec();
+    client.Verify(R_, x, proof, proof_);
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Verify time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+    }
+
+
+    {
+    keywords = {"pdt", "0700", "phillip", "k"};
+    St_1 st_1;
+    int st_2;
+    start_time =  timeSinceEpochMillisec();
+    std::string x = client.GenerateSt(keywords, st_1, st_2);
+
+    std::set<R_Element> R_;
+    std::string proof;
+    std::string proof_;
+    server.Search(st_1, st_2, R_, proof, proof_);
+    client.Search(keywords, x, R_);
+
+    cout<<"search finish"<<endl;
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Search time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+
+    /*Verify*/
+    start_time =  timeSinceEpochMillisec();
+    client.Verify(R_, x, proof, proof_);
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Verify time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+    }
+
+    {
+    keywords = {"pdt", "0700", "phillip", "k", "2000", "enron"};
+    St_1 st_1;
+    int st_2;
+    start_time =  timeSinceEpochMillisec();
+    std::string x = client.GenerateSt(keywords, st_1, st_2);
+
+    std::set<R_Element> R_;
+    std::string proof;
+    std::string proof_;
+    server.Search(st_1, st_2, R_, proof, proof_);
+    client.Search(keywords, x, R_);
+
+    cout<<"search finish"<<endl;
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Search time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+
+    /*Verify*/
+    start_time =  timeSinceEpochMillisec();
+    client.Verify(R_, x, proof, proof_);
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Verify time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+    }
+
+
+    {
+    keywords = {"pdt", "0700", "phillip", "k", "2000", "enron", "ascii", "us"};
+    St_1 st_1;
+    int st_2;
+    start_time =  timeSinceEpochMillisec();
+    std::string x = client.GenerateSt(keywords, st_1, st_2);
+
+    std::set<R_Element> R_;
+    std::string proof;
+    std::string proof_;
+    server.Search(st_1, st_2, R_, proof, proof_);
+    client.Search(keywords, x, R_);
+
+    cout<<"search finish"<<endl;
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Search time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+
+    /*Verify*/
+    start_time =  timeSinceEpochMillisec();
+    client.Verify(R_, x, proof, proof_);
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Verify time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+    }
+
+
+    {
+    keywords = {"pdt", "0700", "phillip", "k", "2000", "enron", "ascii", "us", "7bit", "mime"};
+    St_1 st_1;
+    int st_2;
+    start_time =  timeSinceEpochMillisec();
+    std::string x = client.GenerateSt(keywords, st_1, st_2);
+
+    std::set<R_Element> R_;
+    std::string proof;
+    std::string proof_;
+    server.Search(st_1, st_2, R_, proof, proof_);
+    client.Search(keywords, x, R_);
+
+    cout<<"search finish"<<endl;
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Search time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+
+    /*Verify*/
+    start_time =  timeSinceEpochMillisec();
+    client.Verify(R_, x, proof, proof_);
+    end_time =  timeSinceEpochMillisec();
+    std::cout << "Verify time: " <<(end_time - start_time) / 1000.0 << " ms" << std::endl;
+    }
+
+
+
     return 0;
+    
 }

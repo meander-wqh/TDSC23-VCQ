@@ -49,9 +49,10 @@ void Client::Update(std::string id, std::vector<std::string> w, bool op, std::se
         unsigned char vt_3[PRF_LEN];
         unsigned char vt[PRF_LEN];
         Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(w[i] + std::to_string(lcntW-1)).c_str(), PRF_LEN, vt_1);
-        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(w[i] + std::to_string(lcntW)).c_str(), PRF_LEN, vt_1);
-        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(id).c_str(), PRF_LEN, vt_1);
+        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(w[i] + std::to_string(lcntW)).c_str(), PRF_LEN, vt_2);
+        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(id).c_str(), PRF_LEN, vt_3);
         Crypto_Primitives::string_xor((char*)vt_1, (char*)vt_2, PRF_LEN, (char*)vt);
+        Crypto_Primitives::string_xor((char*)vt, (char*)vt_3, PRF_LEN, (char*)vt);
         std::string svt((char*)vt, PRF_LEN);
         
         A1Element e(tag, sdata, svt);
@@ -116,23 +117,24 @@ std::string Client::GenerateSt(std::vector<std::string>& keywords, St_1& st_1, i
     st_1.kX_v = skX_v;
     // Crypto_Primitives::print_string(skX_v);
     st_1.lcntW = Dict[x].lcntW;
+    cout<<"Dict[x].lcntW:"<<Dict[x].lcntW<<endl;
     st_2 = 1;
 
     return x;
 }
 
-std::set<std::string> Client::Search(std::vector<std::string> keywords, std::string x, std::set<R_Element> R_){
+std::set<std::string> Client::Search(std::vector<std::string>& keywords, std::string& x, std::set<R_Element>& R_){
     std::set<std::string> R;
     Dict[x].vW = Dict[x].vW + 1;
     cout<<"R_.size(): "<< R_.size() <<endl;
-
+    cout<<"keywords.size(): "<< keywords.size() <<endl;
 
     for(auto e : R_){
         // cout<<"e.id: "<< e.id <<endl;
         int flag = 1;
         PuncPRF::PPRF_compute_all_keys(e.data);
         for(int i=0;i<keywords.size();i++){
-            if(PuncPRF::PPRF_Eval(F_2[keywords[i]])){
+            if(!PuncPRF::PPRF_Eval(F_2[keywords[i]])){
                flag = 0;
             }
         }
@@ -141,10 +143,46 @@ std::set<std::string> Client::Search(std::vector<std::string> keywords, std::str
         }
     }
 
+    cout<<"Res.size(): "<< R.size()<<endl;;
     cout<<"Res: ";
     for(auto r : R){
         cout<< r <<" ";
     }
     cout<<endl;
     return R;
+}
+
+void Client::Verify(std::set<R_Element> R_, std::string x, std::string proof, std::string proof_){
+    int lcntW = Dict[x].lcntW;
+
+    unsigned char temp1[PRF_LEN];
+    Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(x + std::to_string(0)).c_str(), PRF_LEN, temp1);
+    unsigned char temp2[PRF_LEN];
+    Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(x + std::to_string(lcntW)).c_str(), PRF_LEN, temp2);
+
+    char proof1[PRF_LEN];
+    char proof2[PRF_LEN] = {0};
+    Crypto_Primitives::string_xor((char*)temp1, (char*) temp2, PRF_LEN, proof1);
+
+    for(auto e : R_){
+        std::string id = e.id;
+        unsigned char Fid[PRF_LEN];
+        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(id).c_str(), PRF_LEN, Fid);
+        Crypto_Primitives::string_xor(proof1, (char*) Fid, PRF_LEN, proof1);
+
+        unsigned char FidData[PRF_LEN];
+        Crypto_Primitives::get_prf((unsigned char*)k_1.c_str(), (unsigned char*)(id + Crypto_Primitives::K_SIDToString(e.data)).c_str(), PRF_LEN, Fid);
+        Crypto_Primitives::string_xor(proof2, (char*) FidData, PRF_LEN, proof2);
+
+    }
+
+    std::string sproof1(proof1, PRF_LEN);
+    std::string sproof2(proof2, PRF_LEN);
+
+    if(proof == sproof1 && proof_ == sproof2){
+        cout<<"Accept!"<<endl;
+    }else{
+        cout<<"Reject!"<<endl;
+    }
+    return;
 }

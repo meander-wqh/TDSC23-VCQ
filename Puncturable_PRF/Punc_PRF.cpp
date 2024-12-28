@@ -121,15 +121,15 @@ void PuncPRF::PPRF_compute_all_keys(const vector<GGMNode>& remain_node) {
 
 bool PuncPRF::PPRF_Eval(int msg){
     if(PuncPRF::keys.find(msg) == PuncPRF::keys.end()){
-        cout << "stop at punctured point !" << endl;
+        // cout << "stop at punctured point !" << endl;
         return false;
     }
     else{
-        cout <<"Original pseudo random value of "<< msg << " is : " << endl;
-        for (int j = 0 ; j <16; ++j){
-            printf ( "%02x ",PuncPRF::keys[msg][j]);
-        }
-        cout << endl ;
+        // cout <<"Original pseudo random value of "<< msg << " is : " << endl;
+        // for (int j = 0 ; j <16; ++j){
+        //     printf ( "%02x ",PuncPRF::keys[msg][j]);
+        // }
+        // cout << endl ;
     }
     return true;
 }
