@@ -1,4 +1,4 @@
-# TDSC23-VCQ (under coding)
+# TDSC23-VCQ (Unofficial version)
 This code is for paper "Forward Private Verifiable Dynamic Searchable Symmetric Encryption with Efficient Conjunctive Query". 
 
 
